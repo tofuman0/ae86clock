@@ -11,7 +11,7 @@ An Arduino project which replaces the clock in the AE86 which has Battery Level,
 * DS3231 RTC
 * Original AE86 Clock
 * Replacement 3D Printed parts to mount new hardware
-* Voltage divider
+* Voltage divider (30k / 7.5k (voltage divided by 5) used in code)
 * 2x 5mm female spade terminals
 * Wire
 * 6x 4x2.5mm Screws
