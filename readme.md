@@ -4,11 +4,11 @@ An Arduino project which replaces the clock in the AE86 which has Battery Level,
 
 ## Parts
 
-Arduino Nano / Pro Mini
-3 Tactile buttons
-SSD1306 OLED Display
-SHT21 or DS18D20 Temperature sensor
-DS3231 RTC
-Original AE86 Clock
-Replacement 3D Printed parts to mount new hardware
+* Arduino Nano / Pro Mini
+* 3 Tactile buttons
+* SSD1306 OLED Display
+* SHT21 or DS18D20 Temperature sensor
+* DS3231 RTC
+* Original AE86 Clock
+* Replacement 3D Printed parts to mount new hardware
 
