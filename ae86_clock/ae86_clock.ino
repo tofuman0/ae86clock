@@ -9,7 +9,6 @@
 #endif
 
 #define DEBUG
-#define BASIC
 //#define NO_LOGO
 #define ONEWIRETEMP
 
@@ -55,12 +54,6 @@ void setup() {
   pinMode(BTN_SET, INPUT_PULLUP);  // Set Button
   pinMode(BTN_MIN, INPUT_PULLUP);  // + Button
   pinMode(BTN_HOUR, INPUT_PULLUP); // - Button
-#ifndef BASIC
-  pinMode(RPM_PIN, INPUT_PULLUP);
-  pinMode(SPD_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(RPM_PIN), countRPM, FALLING);
-  attachInterrupt(digitalPinToInterrupt(SPD_PIN), countSPD, FALLING);
-#endif
   pinMode(LED_BUILTIN, OUTPUT); // Status LED
 
 #if defined(IS_TEENSY)
@@ -116,11 +109,6 @@ void checkPane()
       case SETTINGS_TTYPE:
         settingClockType();
         break;
-#ifndef BASIC
-      case SETTINGS_SPDT:
-        settingSpdType();
-        break;
-#endif
       case SETTINGS_TEMP:
         settingTemp();
         break;
@@ -130,14 +118,6 @@ void checkPane()
       case SETTINGS_BRIGHTNESS:
         settingBrightness();
         break;
-#ifndef BASIC
-      case SETTINGS_RPM:
-        settingRPM();
-        break;
-      case SETTINGS_SPD:
-        settingSpeed();
-        break;
-#endif
       case SETTINGS_PANE:
         settingPane();
         break;
@@ -179,14 +159,6 @@ void checkPane()
       case PANE_VOLT:
         paneVolt();
         break;
-#ifndef BASIC
-      case PANE_RPM:
-        paneRPM();
-        break;
-      case PANE_SPD:
-        paneSpeed();
-        break;
-#endif
       default:
         paneTime();
         break;

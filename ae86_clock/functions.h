@@ -233,42 +233,6 @@ void paneVolt()
   printCenter(tempStr, 128, 31);
 }
 
-#ifndef BASIC
-void paneRPM()
-{
-  char tempStr[20];
-  if(millis() - previousMillis > REFRESH_INT)
-  {
-    previousMillis = millis();
-    engineRpm = getRPM();
-  }
-  sprintf_P(tempStr, PSTR("%d"), engineRpm);
-  uint16_t offsetBase = u8g2.getStrWidth("9999");
-  uint16_t offset = u8g2.getStrWidth(tempStr);
-  u8g2.drawStr(8 + (offsetBase - offset), 31, tempStr);
-  strcpy_P(tempStr, STR_ACKRPM);
-  u8g2.drawStr(84, 31, tempStr);
-}
-        
-void paneSpeed()
-{
-  char tempStr[20];
-  uint16_t offset = 0, offsetBase = 0;
-  sprintf_P(tempStr, PSTR("%d"), carSpeed);
-  offsetBase = u8g2.getStrWidth("999");
-  offset = u8g2.getStrWidth(tempStr);
-  u8g2.drawStr(27 + (offsetBase - offset), 31, tempStr);
-  strcpy_P(tempStr, (char*)pgm_read_word(&(speed_acr[settings.speedAcr])));
-  u8g2.drawStr(84, 31, tempStr);
-
-  if(millis() - previousMillis > REFRESH_INT)
-  {
-    previousMillis = millis();
-    carSpeed = getSPD();
-  }
-}
-#endif
-
 void settingTime()
 {
   uint8_t exit = 0;
@@ -323,39 +287,6 @@ void settingClockType()
     }
   }
 }
-
-#ifndef BASIC
-void settingSpdType()
-{
-  char tempStr[20];
-  
-  uint8_t exit = 0, lastSelect = tempSettings.speedAcr;
-
-  u8g2.clearBuffer();
-  sprintf_P(tempStr, PSTR("Speed: %S"), (char*)pgm_read_word(&(spdType[tempSettings.speedAcr])));
-  printCenter(tempStr, 128, 22);
-      
-  while(!exit)
-  {
-    if((checkButton(BTN_MIN) == 1) || (checkButton(BTN_HOUR) == 1))
-      tempSettings.speedAcr = (tempSettings.speedAcr ^ 1) & 1;
-    
-    if(lastSelect != tempSettings.speedAcr)
-    {
-      lastSelect = tempSettings.speedAcr;
-      u8g2.clearBuffer();
-      sprintf_P(tempStr, PSTR("Speed: %S"), (char*)pgm_read_word(&(spdType[tempSettings.speedAcr])));
-      printCenter(tempStr, 128, 22);
-    }
-    
-    if(checkButton(BTN_SET) == 1)
-    {
-      transCfg = 1;
-      exit = 1;
-    }
-  }
-}
-#endif
 
 void settingTemp()
 {
@@ -472,84 +403,6 @@ void settingBrightness()
   }
 }
 
-#ifndef BASIC
-void settingRPM()
-{
-  char tempStr[20];
-  uint8_t exit = 0, lastValue = tempSettings.rpmLimit;
-
-  u8g2.clearBuffer();
-  sprintf_P(tempStr, PSTR("Limit: %dRPM"), tempSettings.rpmLimit);
-  printCenter(tempStr, 128, 22);
-      
-  while(!exit)
-  {
-    if(checkButton(BTN_MIN) == 1)
-      tempSettings.rpmLimit = (tempSettings.rpmLimit + 100) % 10000;
-      
-    if(checkButton(BTN_HOUR) == 1)
-    {
-      if(tempSettings.rpmLimit == 0)
-        tempSettings.rpmLimit = 9900;
-      else
-        tempSettings.rpmLimit = (tempSettings.rpmLimit - 100) % 10000;
-    }
-
-    //if(tempSettings.rpmLimit % 100)
-    //  tempSettings.rpmLimit = tempSettings.rpmLimit / 100 * 100;
-
-    //if(tempSettings.rpmLimit > 9999) tempSettings.rpmLimit = 9999;
-    
-    if(lastValue != tempSettings.rpmLimit)
-    {
-      lastValue = tempSettings.rpmLimit;
-      u8g2.clearBuffer();
-      sprintf_P(tempStr, PSTR("Limit: %dRPM"), tempSettings.rpmLimit);
-      printCenter(tempStr, 128, 22);
-    }
-    
-    if(checkButton(BTN_SET) == 1)
-    {
-      transCfg = 1;
-      exit = 1;
-    }
-  }
-}
-
-void settingSpeed()
-{
-  char tempStr[20];
-  uint8_t exit = 0, lastValue = tempSettings.spdLimit;
-
-  u8g2.clearBuffer();
-  sprintf_P(tempStr, PSTR("Limit: %d%S"), tempSettings.spdLimit, (char*)pgm_read_word(&(spdType[tempSettings.speedAcr])));
-  printCenter(tempStr, 128, 22);
-      
-  while(!exit)
-  {
-    if((checkButton(BTN_MIN) == 1) && (tempSettings.spdLimit < 300))
-      tempSettings.spdLimit += 5;
-      
-    if((checkButton(BTN_HOUR) == 1) && (tempSettings.spdLimit >= 5))
-      tempSettings.spdLimit -= 5;
-    
-    if(lastValue != tempSettings.spdLimit)
-    {
-      lastValue = tempSettings.spdLimit;
-      u8g2.clearBuffer();
-      sprintf_P(tempStr, PSTR("Limit: %d%S"), tempSettings.spdLimit, (char*)pgm_read_word(&(spdType[tempSettings.speedAcr])));
-      printCenter(tempStr, 128, 22);
-    }
-    
-    if(checkButton(BTN_SET) == 1)
-    {
-      transCfg = 1;
-      exit = 1;
-    }
-  }
-}
-#endif
-
 void settingPane()
 {
   char tempStr[20];
@@ -629,13 +482,6 @@ void readConfig()
   bool configInvalid = false;
   EEPROM.get(EPRM_CFG_ADDR, settings);
   delay(10);
-#ifndef BASIC  
-  if(settings.speedAcr > SPD_KPH)
-  {
-    settings.speedAcr = SPD_MPH;
-    configInvalid = true;
-  }
-#endif
   if(settings.tempType > TEMP_F)
   {
     settings.tempType = TEMP_C;
@@ -660,26 +506,10 @@ void readConfig()
   {
     settings.displayBrightness = 10;
   }
-#ifndef BASIC
-  if(settings.rpmLimit > 9999)
-  {
-    settings.rpmLimit = 0;
-    configInvalid = true;
-  }
-  if(settings.spdLimit > 300)
-  {
-    settings.spdLimit = 0;
-    configInvalid = true;
-  }
-#endif
   paneSelect = settings.defaultPane;
 
 #ifdef DEBUG
   Serial.println(F("Config Loaded:"));
-#ifndef BASIC
-  Serial.print_P(F("  Speed Acr: "));
-  Serial.println(settings.speedAcr ,DEC);
-#endif
   Serial.print(F("  Temp Type: "));
   Serial.println(settings.tempType ,DEC);
   Serial.print(F("  Voltage Warning: "));
@@ -688,14 +518,6 @@ void readConfig()
   Serial.println(settings.defaultPane ,DEC);
   Serial.print(F("  Display Brightness: "));
   Serial.println(settings.displayBrightness ,DEC);
-#ifndef BASIC
-  Serial.print(F("  Daylight Savings: "));
-  Serial.println(settings.summerTime ,DEC);
-  Serial.print(F("  RPM Limit: "));
-  Serial.println(settings.rpmLimit ,DEC);
-  Serial.print(F("  Speed Limit: "));
-  Serial.println(settings.spdLimit ,DEC);
-#endif
 #endif
 
   if(configInvalid == true)
@@ -767,8 +589,6 @@ int8_t displayMenu(const char * title, const char ** items, uint8_t numItems, in
     {
       *selection = (*selection + 1) % numItems;
     }
-    
-    //if(lastSelection != *selection)
     {
       u8g2.clearBuffer();
       sprintf_P(tempStr, PSTR("%S"), (char*)pgm_read_word(&(items[*selection % numItems])));
@@ -777,35 +597,6 @@ int8_t displayMenu(const char * title, const char ** items, uint8_t numItems, in
   }
   return *selection;
 }
-
-#ifndef BASIC
-void countRPM()
-{
-  rpmPulses++;
-}
-
-void countSPD()
-{
-  speedPulses++;
-}
-
-uint32_t getRPM()
-{
-  uint32_t RPM = (rpmPulses * (60000.0 / float(REFRESH_INT))) / 2.0;
-  rpmPulses = 0;
-  RPM = min(9999, RPM);
-  return RPM;
-}
-
-uint32_t getSPD()
-{
-  if(!speedPulses) return 0;
-  uint32_t SPD = ((((((speedPulses * (60000.0 / float(REFRESH_INT))) / FINAL_DRIVE) * (WHEEL_DIAMETER * 3.14))) * 60.0) / ((settings.speedAcr == SPD_MPH) ? 1621371.0 : 1000000.0));
-  speedPulses = 0;
-  SPD = min(300, SPD);
-  return SPD;
-}
-#endif
 
 bool isIce()
 {
